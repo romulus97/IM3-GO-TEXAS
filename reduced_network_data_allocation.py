@@ -17,10 +17,6 @@ from pathlib import Path
 ########################################
 
 df_load = pd.read_csv('BA_load.csv',header=0)
-df_BAs = pd.read_csv('BAs.csv',header=0)
-BAs = list(df_BAs['Name'])
-
-df_full = pd.read_csv('nodes_to_BA_state.csv',header=0,index_col=0)
 
 # NODE_NUMBER = [200,225,250,275,300]
 NODE_NUMBER = [50,75,100,125,150,200,225,250,275,300]
