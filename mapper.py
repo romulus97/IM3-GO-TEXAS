@@ -15,8 +15,8 @@ from shapely.geometry import Point, Polygon
 from matplotlib.colors import TwoSlopeNorm
 
 
-# RTS = [150]
-RTS = [300,275,250,225,200,175,150,125,100,75,50]
+RTS = [50]
+# RTS = [300,275,250,225,200,175,150,125,100,75,50]
 distance_threshold = 5
 
 
@@ -163,6 +163,7 @@ for i in non_zero:
             keys.append(t)
             loads.append(l)
             max_loads.append(i)
+            print(t)
 
 load_weights = loads/sum(loads)
 
@@ -382,6 +383,14 @@ for NN in RTS:
     
     df = pd.read_csv('ERCOT_Bus.csv',header=0)
     full = list(df['Number'])
+    
+    # zones = []
+    # for i in selected_nodes:
+    #     z = df.loc[df['Number']==i,'ZoneName'].values[0]
+    #     if z in zones:
+    #         pass
+    #     else:
+    #         zones.append(z)
     
     excluded = [i for i in full if i not in selected_nodes]
     

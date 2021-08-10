@@ -6,7 +6,7 @@ Created on Tue Jun 20 22:14:07 2017
 """
 
 from pyomo.opt import SolverFactory
-from WECC_simple import model as m1
+from ERCOT_simple import model as m1
 from pyomo.core import Var
 from pyomo.core import Constraint
 from pyomo.core import Param
@@ -18,7 +18,7 @@ import pyomo.environ as pyo
 
 days = 365 # Max = 365
 
-instance = m1.create_instance('WECC_data.dat')
+instance = m1.create_instance('ERCOT_data.dat')
 instance.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
 
 Solvername = 'gurobi'

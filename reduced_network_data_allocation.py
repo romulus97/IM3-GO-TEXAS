@@ -20,11 +20,16 @@ df_load = pd.read_csv('BA_load.csv',header=0)
 
 # NODE_NUMBER = [200,225,250,275,300]
 NODE_NUMBER = [50,75,100,125,150,200,225,250,275,300]
-# NODE_NUMBER = [50]
+#NODE_NUMBER = [50]
 
 UC_TREATMENTS = ['_simple','_coal']
 
 trans_p = [25,50,75,100]
+
+df_full = pd.read_csv('ERCOT_Bus.csv',header=0)
+
+z = pd.read_csv('ERCOT_bus.csv',header=0)
+Zones = list(z['ZoneName'].unique())
 
 for NN in NODE_NUMBER:
     
@@ -44,36 +49,45 @@ for NN in NODE_NUMBER:
             buses = list(df_selected['bus_i'])
             
             # pull selected nodes out of 
-            selected_BAs = []
+            selected_zones = []
             for b in buses:
-                BA = df_full.loc[df_full['Number']==b,'NAME']
-                BA = BA.reset_index(drop=True)
-                selected_BAs.append(BA[0])
+                Zone = df_full.loc[df_full['Number']==b,'ZoneName']
+                Zone = Zone.reset_index(drop=True)
+                selected_zones.append(Zone[0])
             
-            df_selected['BA'] = selected_BAs
+            df_selected['Zone'] = selected_zones
+            
+            zones = []
+            for i in buses:
+                z = df_full.loc[df_full['Number']==i,'ZoneName'].values[0]
+                if z in zones:
+                    pass
+                else:
+                    zones.append(z)
                 
-            # calculate nodal weights within each BA
+            # calculate nodal weights within each Zone
             
-            BA_totals = []
-            for b in BAs:
-                sample = list(df_selected.loc[df_selected['BA']==b,'Pd'])
+            Zone_totals = []
+            for b in Zones:
+                sample = list(df_selected.loc[df_selected['Zone']==b,'Pd'])
                 corrected = [0 if x<0 else x for x in sample]
-                BA_totals.append(sum(corrected))
+                Zone_totals.append(sum(corrected))
             
-            BA_totals = np.column_stack((BAs,BA_totals))
-            df_BA_totals = pd.DataFrame(BA_totals)
-            df_BA_totals.columns = ['Name','Total']
+            Z = sum(Zone_totals)
+            # Zone_totals = np.column_stack((Zones,Zone_totals))
+            # df_Zone_totals = pd.DataFrame(Zone_totals)
+            # df_Zone_totals.columns = ['Name','Total']
             
             weights = []
             for i in range(0,len(df_selected)):
-                area = df_selected.loc[i,'BA']
+                area = df_selected.loc[i,'Zone']
                 if df_selected.loc[i,'Pd'] <0:
                     weights.append(0)
                 else:        
-                    X = float(df_BA_totals.loc[df_BA_totals['Name']==area,'Total'])
-                    W = (df_selected.loc[i,'Pd']/X)
+                    # X = float(df_Zone_totals.loc[df_Zone_totals['Name']==area,'Total'])
+                    W = (df_selected.loc[i,'Pd']/Z)
                     weights.append(W)
-            df_selected['BA Load Weight'] = weights
+            df_selected['Load Weight'] = weights
             
             idx = 0
             w= 0
@@ -82,12 +96,12 @@ for NN in NODE_NUMBER:
             for i in range(0,len(df_selected)):
                     
                 #load for original node
-                name = df_selected.loc[i,'BA']
+                name = df_selected.loc[i,'Zone']
                 
-                abbr = df_BAs.loc[df_BAs['Name']==name,'Abbreviation'].values[0]
-                weight = df_selected.loc[i,'BA Load Weight']
+                abbr = 'ERCOT'
+                weight = df_selected.loc[i,'Load Weight']
                 # T[:,i] = T[:,i] + np.reshape(df_load[abbr].values*weight,(8760,))
-                T[:,i] = T[:,i] + np.reshape(df_load[abbr].values*weight,(8760,))*(float(df_BA_totals.loc[df_BA_totals['Name']==name,'Total'])/max(df_load[abbr]))  
+                T[:,i] = T[:,i] + np.reshape(df_load[abbr].values*weight,(8760,))
             
             for i in range(0,len(buses)):
                 buses[i] = 'bus_' + str(buses[i])
@@ -101,8 +115,8 @@ for NN in NODE_NUMBER:
             #############
             # GENERATORS
             
-            df_wind = pd.read_csv('BA_wind.csv',header=0,index_col=0)
-            df_solar = pd.read_csv('BA_solar.csv',header=0,index_col=0)
+            df_wind = pd.read_csv('BA_wind.csv',header=0)
+            df_solar = pd.read_csv('BA_solar.csv',header=0)
             
             #get rid of NaNs
             a = df_wind.values
@@ -117,8 +131,8 @@ for NN in NODE_NUMBER:
                 df_solar.iloc[m[0][i],m[1][i]] = 0    
             
             # read reduction algorithm summary and parse nodal operations
-            df_summary = pd.read_excel(FN,sheet_name='Summary',header=5)
-            df_summary = df_summary.drop([len(df_summary)-1])
+            df_summary = pd.read_excel(FN,sheet_name='Summary',header=25)
+            # df_summary = df_summary.drop([len(df_summary)-1])
             nodes=0
             merged = {}
             N = []
@@ -141,12 +155,9 @@ for NN in NODE_NUMBER:
                 merged[n] = k
             
             ##################################
-            # WIND ALLOCATION FROM BA TO NODE
-            
-            #### NOTE: TAMU DATASET DOES NOT INCLUDE ANY WIND IN: LADWP OR PSCO; EIA VALUES
-            # FOR THESE BAs WERE MANUALLY ADDED TO CAISO AND WACM IN THE BA_wind.csv FILE.
-            
-            df_gen = pd.read_csv('10k_Gen.csv',header=0)
+            # WIND ALLOCATION TO NODE
+                       
+            df_gen = pd.read_csv('ERCOT_Generators.csv',header=0)
             MWMax = []
             fuel_type = []
             nums = list(df_gen['BusNum'])
@@ -164,33 +175,34 @@ for NN in NODE_NUMBER:
             df_full['MWMax'] = MWMax
             df_full['FuelType'] = fuel_type
             
-            BA_totals = []
+            Zone_totals = []
             
-            for b in BAs:
-                sample = list(df_full.loc[(df_full['NAME']==b) & (df_full['FuelType'] == 'WND (Wind)'),'MWMax'])
+            for b in Zones:
+                sample = list(df_full.loc[(df_full['ZoneName']==b) & (df_full['FuelType'] == 'WND (Wind)'),'MWMax'])
                 # corrected = [0 if math.isnan(x) else x for x in sample]
-                BA_totals.append(sum(sample))
+                Zone_totals.append(sum(sample))
+            Z = sum(Zone_totals)
             
-            BA_totals = np.column_stack((BAs,BA_totals))
-            df_BA_totals = pd.DataFrame(BA_totals)
-            df_BA_totals.columns = ['Name','Total']
+            Zone_totals = np.column_stack((Zones,Zone_totals))
+            df_Zone_totals = pd.DataFrame(Zone_totals)
+            df_Zone_totals.columns = ['Name','Total']
             
             weights = []
             for i in range(0,len(df_full)):
-                area = df_full.loc[i,'NAME']
+                area = df_full.loc[i,'ZoneName']
                 if str(area) == 'nan':
                     weights.append(0)
                 elif str(df_full.loc[i,'FuelType']) != 'WND (Wind)':
                     weights.append(0)
                 else:        
-                    X = float(df_BA_totals.loc[df_BA_totals['Name']==area,'Total'])
-                    W = df_full.loc[i,'MWMax']/X
+                    # X = float(df_Zone_totals.loc[df_Zone_totals['Name']==area,'Total'])
+                    W = df_full.loc[i,'MWMax']/Z
                     weights.append(W)
-            df_full['BA Wind Weight'] = weights
+            df_full['Zone Wind Weight'] = weights
             
             sums = []
-            for i in BAs:
-                s = sum(df_full.loc[df_full['NAME']==i,'BA Wind Weight'])
+            for i in Zones:
+                s = sum(df_full.loc[df_full['ZoneName']==i,'Zone Wind Weight'])
                 sums.append(s)
             
             # selected nodes
@@ -201,24 +213,24 @@ for NN in NODE_NUMBER:
             w= 0
             T = np.zeros((8760,len(buses)))
             
-            BA_sums = np.zeros((28,1))
+            Zone_sums = np.zeros((len(Zones),1))
             
             for b in buses:
                 
                 #load for original node
                 sample = df_full.loc[df_full['Number'] == b]
                 sample = sample.reset_index(drop=True)
-                name = sample['NAME'][0]
+                name = sample['ZoneName'][0]
             
                 
                 if str(name) != 'nan':
             
-                    abbr = df_BAs.loc[df_BAs['Name']==name,'Abbreviation'].values[0]
-                    weight = sample['BA Wind Weight'].values[0]
+                    abbr = 'ERCOT'
+                    weight = sample['Zone Wind Weight'].values[0]
                     T[:,idx] = T[:,idx] + np.reshape(df_wind[abbr].values*weight,(8760,))
                     w += weight
-                    dx = BAs.index(name)
-                    BA_sums[dx] = BA_sums[dx] + weight
+                    dx = Zones.index(name)
+                    Zone_sums[dx] = Zone_sums[dx] + weight
                     
                 else:
                     pass
@@ -231,15 +243,15 @@ for NN in NODE_NUMBER:
                         #load for original node
                         sample = df_full.loc[df_full['Number'] == m]
                         sample = sample.reset_index(drop=True)
-                        name = sample['NAME'][0]
+                        name = sample['ZoneName'][0]
                         if str(name) == 'nan':
                             pass
                         else:
-                            abbr = df_BAs.loc[df_BAs['Name']==name,'Abbreviation'].values[0]
-                            weight = sample['BA Wind Weight']
+                            abbr = 'ERCOT'
+                            weight = sample['Zone Wind Weight']
                             w += weight  
-                            dx = BAs.index(name)
-                            BA_sums[dx] = BA_sums[dx] + weight
+                            dx = Zones.index(name)
+                            Zone_sums[dx] = Zone_sums[dx] + weight
                             T[:,idx] = T[:,idx] + np.reshape(df_wind[abbr].values*weight.values[0],(8760,))
             
                 except KeyError:
@@ -260,37 +272,37 @@ for NN in NODE_NUMBER:
             
             ##################################
             # SOLAR ALLOCATION FROM BA TO NODE
+                        
+            Zone_totals = []
             
-            #### NOTE: TAMU DATASET DOES NOT INCLUDE ANY WIND IN: BANC, LADWP OR PSCO; EIA VALUES
-            # FOR THESE BAs WERE MANUALLY ADDED TO CAISO AND WACM IN THE BA_wind.csv FILE.
-            
-            BA_totals = []
-            
-            for b in BAs:
-                sample = list(df_full.loc[(df_full['NAME']==b) & (df_full['FuelType'] == 'SUN (Solar)'),'MWMax'])
+            for b in Zones:
+                sample = list(df_full.loc[(df_full['ZoneName']==b) & (df_full['FuelType'] == 'SUN (Solar)'),'MWMax'])
                 # corrected = [0 if math.isnan(x) else x for x in sample]
-                BA_totals.append(sum(sample))
+                Zone_totals.append(sum(sample))
             
-            BA_totals = np.column_stack((BAs,BA_totals))
-            df_BA_totals = pd.DataFrame(BA_totals)
-            df_BA_totals.columns = ['Name','Total']
+            Z = sum(Zone_totals)
+            
+            Zone_totals = np.column_stack((Zones,Zone_totals))
+            df_Zone_totals = pd.DataFrame(Zone_totals)
+            df_Zone_totals.columns = ['Name','Total']
+        
             
             weights = []
             for i in range(0,len(df_full)):
-                area = df_full.loc[i,'NAME']
+                area = df_full.loc[i,'ZoneName']
                 if str(area) == 'nan':
                     weights.append(0)
                 elif str(df_full.loc[i,'FuelType']) != 'SUN (Solar)':
                     weights.append(0)
                 else:        
-                    X = float(df_BA_totals.loc[df_BA_totals['Name']==area,'Total'])
-                    W = df_full.loc[i,'MWMax']/X
+                    X = float(df_Zone_totals.loc[df_Zone_totals['Name']==area,'Total'])
+                    W = df_full.loc[i,'MWMax']/Z
                     weights.append(W)
-            df_full['BA Solar Weight'] = weights
+            df_full['Zone Solar Weight'] = weights
             
             sums = []
-            for i in BAs:
-                s = sum(df_full.loc[df_full['NAME']==i,'BA Solar Weight'])
+            for i in Zones:
+                s = sum(df_full.loc[df_full['ZoneName']==i,'Zone Solar Weight'])
                 sums.append(s)
             
             # selected nodes
@@ -301,24 +313,24 @@ for NN in NODE_NUMBER:
             w= 0
             T = np.zeros((8760,len(buses)))
             
-            BA_sums = np.zeros((28,1))
+            Zone_sums = np.zeros((28,1))
             
             for b in buses:
                 
                 #load for original node
                 sample = df_full.loc[df_full['Number'] == b]
                 sample = sample.reset_index(drop=True)
-                name = sample['NAME'][0]
+                name = sample['ZoneName'][0]
             
                 
                 if str(name) != 'nan':
             
-                    abbr = df_BAs.loc[df_BAs['Name']==name,'Abbreviation'].values[0]
-                    weight = sample['BA Solar Weight'].values[0]
+                    abbr = 'ERCOT'
+                    weight = sample['Zone Solar Weight'].values[0]
                     T[:,idx] = T[:,idx] + np.reshape(df_solar[abbr].values*weight,(8760,))
                     w += weight
-                    dx = BAs.index(name)
-                    BA_sums[dx] = BA_sums[dx] + weight
+                    dx = Zones.index(name)
+                    Zone_sums[dx] = Zone_sums[dx] + weight
                     
                 else:
                     pass
@@ -331,15 +343,15 @@ for NN in NODE_NUMBER:
                         #load for original node
                         sample = df_full.loc[df_full['Number'] == m]
                         sample = sample.reset_index(drop=True)
-                        name = sample['NAME'][0]
+                        name = sample['ZoneName'][0]
                         if str(name) == 'nan':
                             pass
                         else:
-                            abbr = df_BAs.loc[df_BAs['Name']==name,'Abbreviation'].values[0]
-                            weight = sample['BA Solar Weight']
+                            abbr = 'ERCOT'
+                            weight = sample['Zone Solar Weight']
                             w += weight  
-                            dx = BAs.index(name)
-                            BA_sums[dx] = BA_sums[dx] + weight
+                            dx = Zones.index(name)
+                            Zone_sums[dx] = Zone_sums[dx] + weight
                             T[:,idx] = T[:,idx] + np.reshape(df_solar[abbr].values*weight.values[0],(8760,))
             
                 except KeyError:
@@ -364,7 +376,7 @@ for NN in NODE_NUMBER:
             
             import re
             
-            df_gens = pd.read_csv('10k_Gen.csv',header=0)
+            df_gens = pd.read_csv('ERCOT_Generators.csv',header=0)
             old_bus_num =[]
             new_bus_num = []
             NB = []
@@ -440,10 +452,10 @@ for NN in NODE_NUMBER:
             
             ##############################
             # HYDROPOWER
-            
+                       
             #EIA plants
-            df_hydro = pd.read_csv('EIA_317_WECC_hydro_plants_to_10kbus_v2.csv',header=0)
-            df_hydro_ts = pd.read_csv('p_mean_max_min_MW_WECC_317plants_2009water_weekly.csv',header=0)
+            df_hydro = pd.read_csv('EIA_ERCOT_reduced_hydro_plants.csv',header=0)
+            df_hydro_ts = pd.read_csv('p_mean_max_min_MW_ERCOTplants_weekly_2019.csv',header=0)
             new_hydro_nodes = []
             
             for i in range(0,len(df_hydro)):
@@ -688,6 +700,11 @@ for NN in NODE_NUMBER:
             
             A = np.zeros((len(gens),len(all_nodes)))
             
+            # for i in range(0,len(gens)):
+            #     node = df.loc[i,'node']
+            #     n_i = all_nodes.index(node)
+            #     A[i,n_i] = 1
+            
             df_A = pd.DataFrame(A)
             df_A.columns = all_nodes
             df_A['name'] = gens
@@ -695,6 +712,7 @@ for NN in NODE_NUMBER:
             
             for i in range(0,len(gens)):
                 node = df.loc[i,'node']
+                # print(node)
                 g = gens[i]
                 df_A.loc[g,node] = 1
             
@@ -845,14 +863,14 @@ for NN in NODE_NUMBER:
             
             #copy other files
             w = 'wrapper' + UC + '.py'
-            milp = 'WECC_MILP' + UC + '.py'
-            lp = 'WECC_LP' + UC + '.py'
+            milp = 'ERCOT_MILP' + UC + '.py'
+            lp = 'ERCOT_LP' + UC + '.py'
             
             copy(w,path)
-            copy('WECCDataSetup.py',path)
+            copy('ERCOTDataSetup.py',path)
             
             if UC == '_simple':
-                copy('WECC' + UC + '.py',path)
+                copy('ERCOT' + UC + '.py',path)
             else:          
                 copy(milp,path)
                 copy(lp,path)
