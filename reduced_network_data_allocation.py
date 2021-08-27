@@ -19,12 +19,14 @@ from pathlib import Path
 df_load = pd.read_csv('BA_load.csv',header=0)
 
 # NODE_NUMBER = [200,225,250,275,300]
-NODE_NUMBER = [50,75,100,125,150,200,225,250,275,300]
-#NODE_NUMBER = [50]
+#NODE_NUMBER = [50,75,100,125,150,200,225,250,275,300]
+NODE_NUMBER = [75]
 
-UC_TREATMENTS = ['_simple','_coal']
+# UC_TREATMENTS = ['_simple','_coal']
+UC_TREATMENTS = ['_simple']
 
-trans_p = [25,50,75,100]
+trans_p = [25]
+# trans_p = [25,50,75,100]
 
 df_full = pd.read_csv('ERCOT_Bus.csv',header=0)
 
@@ -42,7 +44,7 @@ for NN in NODE_NUMBER:
             
             T_p = T_p/100
             
-            FN = 'Results_Excluded_Nodes_' + str(NN) + '.xlsx'
+            FN = 'Results_' + str(NN) + '.xlsx'
          
             # selected nodes
             df_selected = pd.read_excel(FN,sheet_name = 'Bus', header=0)
@@ -131,7 +133,7 @@ for NN in NODE_NUMBER:
                 df_solar.iloc[m[0][i],m[1][i]] = 0    
             
             # read reduction algorithm summary and parse nodal operations
-            df_summary = pd.read_excel(FN,sheet_name='Summary',header=25)
+            df_summary = pd.read_excel(FN,sheet_name='Summary',header=5)
             # df_summary = df_summary.drop([len(df_summary)-1])
             nodes=0
             merged = {}
@@ -529,7 +531,7 @@ for NN in NODE_NUMBER:
             #########################################
             # Generator file setup
             
-            df_G = pd.read_csv('Thermal_Gens.csv',header=0)
+            df_G = pd.read_csv('thermal_Gens.csv',header=0)
             
             names = []
             typs = []
