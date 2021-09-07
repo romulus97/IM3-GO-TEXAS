@@ -15,8 +15,8 @@ from shapely.geometry import Point, Polygon
 from matplotlib.colors import TwoSlopeNorm
 
 
-RTS = [50]
-# RTS = [300,275,250,225,200,175,150,125,100,75,50]
+# RTS = [50]
+RTS = [300,275,250,225,200,175,150,125,100,75,50]
 distance_threshold = 5
 
 
@@ -375,7 +375,8 @@ for NN in RTS:
     ax.set_xlim(-750000,750000)
     ax.set_ylim([-2250000,-750000])
     plt.axis('off')
-    plt.savefig('draft_topology.jpg',dpi=330)
+    name = 'draft_topology_' + str(NN) + '.jpg'
+    plt.savefig(name,dpi=330)
     
     
      

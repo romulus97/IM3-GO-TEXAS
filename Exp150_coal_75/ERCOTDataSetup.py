@@ -87,6 +87,9 @@ df_load = pd.read_csv('nodal_load.csv',header=0)
 df_must = pd.read_csv('must_run.csv',header=0)
 h3 = df_must.columns
 
+## Fuel prices at substation-level
+df_fuel = pd.read_csv('Fuel_prices.csv',header=0)
+
 ######=================================================########
 ######               Segment A.3                       ########
 ######=================================================########
@@ -94,6 +97,7 @@ h3 = df_must.columns
 ####======== Lists of Nodes of the Power System ========#######
 
 all_nodes = list(df_load.columns)
+all_thermals = list(df_fuel.columns)
 
 
 ######=================================================########
@@ -380,5 +384,16 @@ with open(''+str(data_name)+'.dat', 'w') as f:
     f.write(';\n\n')
     
     print('line to bus')
+    
+####### Daily fuel prices
+
+    f.write('param:' + '\t' +'SimFuelPrice:=' + '\n')      
+    for z in all_thermals:
+        for d in range(0,int(SimHours/24)): 
+            f.write(z + '\t' + str(d+1) + '\t' + str(df_fuel.loc[d,z]) + '\n')
+    f.write(';\n\n')
+    
+    print('fuel prices')
+    
 
 print ('Complete:',data_name)

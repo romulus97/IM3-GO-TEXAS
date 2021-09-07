@@ -16,12 +16,12 @@ import numpy as np
 from datetime import datetime
 import pyomo.environ as pyo
 
-days = 5 # Max = 365
+days = 365 # Max = 365
 
 instance = m1.create_instance('ERCOT_data.dat')
 instance.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
 
-Solvername = 'cplex'
+Solvername = 'gurobi'
 Timelimit = 1800 # for the simulation of one day in seconds
 # Threadlimit = 8 # maximum number of threads to use
 
@@ -77,6 +77,10 @@ for day in range(1,days):
         for i in K:
             instance.HorizonWind[z,i] = instance.SimWind[z,(day-1)*24+i]
 
+    for z in instance.Thermal:
+    #load fuel prices for thermal generators
+        instance.FuelPrice[z] = instance.SimFuelPrice[z,day]
+        
     result = opt.solve(instance,tee=True,symbolic_solver_labels=True, load_solutions=False) ##,tee=True to check number of variables\n",
     instance.solutions.load_from(result)  
     
@@ -105,10 +109,20 @@ for day in range(1,days):
                         
         if a=='mwh':
             for index in varobject:
+                
+                gen_name = index[0]
+                gen_heatrate = df_generators[df_generators['name']==gen_name]['heat_rate'].values[0]
+
+                
                 if int(index[1]>0 and index[1]<25):
+                    
+                    fuel_price = instance.FuelPrice[z].value
+                    
                     if index[0] in instance.Gas:
+                        marginal_cost = gen_heatrate*fuel_price
                         mwh.append((index[0],'Gas',index[1]+((day-1)*24),varobject[index].value))   
                     elif index[0] in instance.Coal:
+                        marginal_cost = gen_heatrate*fuel_price
                         mwh.append((index[0],'Coal',index[1]+((day-1)*24),varobject[index].value))  
                     elif index[0] in instance.Oil:
                         mwh.append((index[0],'Oil',index[1]+((day-1)*24),varobject[index].value))   

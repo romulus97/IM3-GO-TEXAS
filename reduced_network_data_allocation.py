@@ -19,14 +19,14 @@ from pathlib import Path
 df_load = pd.read_csv('BA_load.csv',header=0)
 
 # NODE_NUMBER = [200,225,250,275,300]
-#NODE_NUMBER = [50,75,100,125,150,200,225,250,275,300]
-NODE_NUMBER = [75]
+NODE_NUMBER = [50,75,100,125,150,175,200,225,250,275,300]
+#NODE_NUMBER = [175]
 
-# UC_TREATMENTS = ['_simple','_coal']
-UC_TREATMENTS = ['_simple']
+UC_TREATMENTS = ['_simple','_coal']
+# UC_TREATMENTS = ['_simple']
 
-trans_p = [25]
-# trans_p = [25,50,75,100]
+# trans_p = [25]
+trans_p = [25,50,75,100]
 
 df_full = pd.read_csv('ERCOT_Bus.csv',header=0)
 
@@ -379,9 +379,15 @@ for NN in NODE_NUMBER:
             import re
             
             df_gens = pd.read_csv('ERCOT_Generators.csv',header=0)
+            df_gens = df_gens.replace('', np.nan, regex=True)
+            df_gens_heat_rate = pd.read_csv('ERCOT_Heat_Rates.csv',header=0)
             old_bus_num =[]
             new_bus_num = []
             NB = []
+            
+            old_bus_num_hr =[]
+            new_bus_num_hr = []
+            NB_hr = []
             
             for n in N:
                 k = merged[n]
@@ -398,16 +404,33 @@ for NN in NODE_NUMBER:
                     NB.append(OB)
             
             df_gens['NewBusNum'] = NB
-                
+            
+            for i in range(0,len(df_gens_heat_rate)):
+                OB = df_gens_heat_rate.loc[i,'BusNum']
+                if OB in old_bus_num:
+                    idx = old_bus_num.index(OB)
+                    NB_hr.append(new_bus_num[idx])
+                else:
+                    NB_hr.append(OB)
+            
+            df_gens_heat_rate['NewBusNum'] = NB_hr
+    
             names = list(df_gens['BusName'])
+            names_hr = list(df_gens_heat_rate['BusName'])
             
             # remove numbers and spaces
             for n in names:
                 i = names.index(n)
                 corrected = re.sub(r'[^A-Z]',r'',n)
                 names[i] = corrected
+                
+            for n in names_hr:
+                i = names_hr.index(n)
+                corrected = re.sub(r'[^A-Z]',r'',n)
+                names_hr[i] = corrected
             
             df_gens['PlantNames'] = names
+            df_gens_heat_rate['PlantNames'] = names_hr
             
             NB = df_gens['NewBusNum'].unique()
             plants = []
@@ -415,23 +438,28 @@ for NN in NODE_NUMBER:
             mw_min = []
             count = 2
             nbs = []
-            marg = []
+            heat_rate = []
             f = []
             thermal = ['NG (Natural Gas)','NUC (Nuclear)','BIT (Bituminous Coal)','NUC (Nuclear)']
             
             for n in NB:
                 sample = df_gens.loc[df_gens['NewBusNum'] == n]
+                sample_hr = df_gens_heat_rate.loc[df_gens_heat_rate['NewBusNum'] == n]
                 sublist = sample['PlantNames'].unique()
                 for s in sublist:
                     fuel = list(sample.loc[sample['PlantNames']==s,'FuelType'])
                     if fuel[0] in thermal:
                         c = sum(sample.loc[sample['PlantNames']==s,'MWMax'].values)
-                        mc = np.mean(sample.loc[sample['PlantNames']==s,'MargCostMW'].values)
+                        hr = np.nanmean(sample.loc[sample['PlantNames']==s,'Heat Rate MBTU/MWH'].values)
+                        if hr == np.nan or hr == 0 or hr == 'nan' or hr == '':
+                            hr = np.nanmean(sample_hr.loc[sample_hr['PlantNames']==s,'Heat Rate MBTU/MWH'].values)
+                        else:
+                            pass
                         mn = sum(sample.loc[sample['PlantNames']==s,'MWMin'].values)
                         mw_min.append(mn)
                         caps.append(c)
                         nbs.append(n)
-                        marg.append(mc)
+                        heat_rate.append(hr)
                         f.append(fuel[0])
                         if s in plants:
                             new = s + '_' + str(count)
@@ -444,10 +472,10 @@ for NN in NODE_NUMBER:
             C=np.column_stack((C,f))
             C=np.column_stack((C,caps))
             C=np.column_stack((C,mw_min))
-            C=np.column_stack((C,marg))
+            C=np.column_stack((C,heat_rate))
             
             df_C = pd.DataFrame(C)
-            df_C.columns = ['Name','Bus','Fuel','Max_Cap','Min_Cap','MarginalCost']
+            df_C.columns = ['Name','Bus','Fuel','Max_Cap','Min_Cap','Heat_Rate']
             df_C.to_csv('thermal_gens.csv',index=None)
             copy('thermal_gens.csv',path)
                 
@@ -538,7 +566,7 @@ for NN in NODE_NUMBER:
             nodes = []
             maxcaps = []
             mincaps = []
-            marginal_costs = []
+            heat_rates = []
             var_oms = []
             no_loads = []
             st_costs = []
@@ -562,7 +590,7 @@ for NN in NODE_NUMBER:
                 node = 'bus_' + str(df_G.loc[i,'Bus'])
                 maxcap = df_G.loc[i,'Max_Cap']
                 mincap = df_G.loc[i,'Min_Cap']
-                mc = df_G.loc[i,'MarginalCost']
+                hr_2 = df_G.loc[i,'Heat_Rate']
                 
                 if typ == 'ngcc':
                     var_om = 3
@@ -591,7 +619,7 @@ for NN in NODE_NUMBER:
                     ramps.append(ramp)
                     minups.append(minup)
                     mindns.append(mindn)
-                    marginal_costs.append(mc)
+                    heat_rates.append(hr_2)
                     
                 else:
                     
@@ -619,7 +647,7 @@ for NN in NODE_NUMBER:
                     ramps.append(0)
                     minups.append(0)
                     mindns.append(0) 
-                    marginal_costs.append(0)
+                    heat_rates.append(0)
             
             # solar
             
@@ -640,7 +668,7 @@ for NN in NODE_NUMBER:
                     ramps.append(0)
                     minups.append(0)
                     mindns.append(0)   
-                    marginal_costs.append(0)
+                    heat_rates.append(0)
             
             # hydro
             
@@ -661,14 +689,14 @@ for NN in NODE_NUMBER:
                     ramps.append(maxcap)
                     minups.append(0)
                     mindns.append(0)   
-                    marginal_costs.append(0)
+                    heat_rates.append(0)
             
             df_genparams = pd.DataFrame()
             df_genparams['name'] = names
             df_genparams['typ'] = typs
             df_genparams['node'] = nodes
             df_genparams['maxcap'] = maxcaps
-            df_genparams['marginal_cost'] = marginal_costs
+            df_genparams['heat_rate'] = heat_rates
             df_genparams['mincap'] = mincaps
             df_genparams['var_om'] = var_oms
             df_genparams['no_load'] = no_loads
@@ -861,6 +889,68 @@ for NN in NODE_NUMBER:
             df_line_params['limit'] = limit 
             df_line_params.to_csv('line_params.csv',index=None)
             copy('line_params.csv',path)
+            
+            #####################################
+            # FUEL PRICES
+            
+            # Natural gas prices
+            NG_price = pd.read_csv('gas_prices.csv', header=0)
+            buses = list(df_selected['bus_i'])
+            for bus in buses:
+                
+                # selected_node_BA = df_full.loc[df_full['Number']==bus,'NAME'].values[0]
+                specific_node_NG_price = NG_price.loc[:,'HenryHub'].copy()
+                
+                if buses.index(bus) == 0:
+                    NG_prices_all = specific_node_NG_price.copy()
+                else:
+                    NG_prices_all = pd.concat([NG_prices_all,specific_node_NG_price], axis=1)
+            
+            Fuel_buses = []
+            for i in range(0,len(buses)):
+                Fuel_buses.append('bus_' + str(buses[i]))
+            
+            NG_prices_all.columns = Fuel_buses
+            
+            # Coal prices
+            Coal_price = pd.read_csv('coal_prices.csv', header=0)
+    
+            for bus in buses:
+                
+                # selected_node_state = df_full.loc[df_full['Number']==bus,'STATE'].values[0]
+                specific_node_coal_price = Coal_price.loc[:,'TX'].copy()
+                
+                if buses.index(bus) == 0:
+                    Coal_prices_all = specific_node_coal_price.copy()
+                else:
+                    Coal_prices_all = pd.concat([Coal_prices_all,specific_node_coal_price], axis=1)
+            
+            Coal_prices_all.columns = Fuel_buses
+            
+            # getting generator based fuel prices
+            
+            thermal_gens_info = df_genparams.loc[(df_genparams['typ']=='ngcc') | (df_genparams['typ']=='coal')].copy()
+            thermal_gens_names = [*thermal_gens_info['name']]
+
+            for ind, row in thermal_gens_info.iterrows():
+                
+                if row['typ'] == 'ngcc':
+                    gen_fuel_price = NG_prices_all.loc[:, row['node']].copy() 
+                elif row['typ'] == 'coal':
+                    gen_fuel_price = Coal_prices_all.loc[:, row['node']].copy() 
+                else:
+                    pass
+                
+                if thermal_gens_names.index(row['name']) == 0:
+                    Fuel_prices_all = gen_fuel_price.copy()
+                else:
+                    Fuel_prices_all = pd.concat([Fuel_prices_all,gen_fuel_price], axis=1)
+                    
+            Fuel_prices_all.columns = thermal_gens_names
+            
+            Fuel_prices_all.to_csv('Fuel_prices.csv',index=None)
+            copy('Fuel_prices.csv',path)       
+
             
             
             #copy other files

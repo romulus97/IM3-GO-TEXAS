@@ -18,9 +18,9 @@ import matplotlib.lines as mlines
 
 # load data
 
-df_full = pd.read_csv('10k_load.csv',header=0)
-df_selected = pd.read_csv('nodes_50.csv',header=0)
-df_branches = pd.read_csv('branches_50.csv',header=0)
+df_full = pd.read_csv('ERCOT_bus.csv',header=0)
+df_selected = pd.read_csv('nodes_100.csv',header=0)
+df_branches = pd.read_csv('branches_100.csv',header=0)
 df_branches = df_branches[['fbus','tbus','rateA']]
 
 buses = list(df_selected['bus_i'])
@@ -58,7 +58,7 @@ for count, elem in enumerate (df_selected_GPS['Number']):
     pos[elem] = (mx[count], my[count])
 
 nx.draw_networkx_nodes(G = graph, pos = pos, node_list = graph.nodes(), 
-                        node_color = 'orange', alpha = 0.8, node_size = 10)
+                        node_color = 'orange', alpha = 0.8, node_size = 3)
 nx.draw_networkx_edges(G = graph, pos = pos, edge_color='red',
                         alpha=0.2, arrows = False)
 
