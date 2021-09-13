@@ -50,7 +50,6 @@ R2_data = []
 count = 0
 
 plt.figure()
-plt.plot(daily_historical_LMP['Price'])
 
 #running the LMP validation for each model type and saving R2 values
 for NN in node_numbers:
@@ -79,13 +78,14 @@ for NN in node_numbers:
             R2 = daily_reg.score(daily_historical_LMP['Price'].values.reshape(-1, 1), daily_simulated_LMP['Price'].values.reshape(-1, 1))
             R2_data.append(R2)
             
-            if count == 7:
-                plt.plot(daily_simulated_LMP['Price'])
-                
-            count += 1
-            
+            plt.plot(daily_simulated_LMP['Price'])
+
+
+plt.plot(daily_historical_LMP['Price'])
+
 idx = np.where(R2_data==max(R2_data))
             
+plt.savefig('ercot.png',dpi=300)
 
 
 # sns.lineplot(x=daily_average_LMP['{}_LMP'.format(zone)].index, y=daily_average_LMP['{}_LMP'.format(zone)], ax=ax[0,idx], color='black')
