@@ -203,13 +203,13 @@ for day in range(1,days):
             instance.mwh[j,0] = newval_1
             instance.mwh[j,0].fixed = True
             
-            if instance.on[j,24] == 1:
+            if value(instance.on[j,24]) == 1:
                 instance.on[j,0] = 1
             else:
                 instance.on[j,0] = 0
             instance.on[j,0].fixed = True
             
-            if instance.switch[j,24] == 1:
+            if value(instance.switch[j,24]) == 1:
                 instance.switch[j,0] = 1
             else:
                 instance.switch[j,0] = 0

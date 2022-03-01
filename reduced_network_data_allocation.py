@@ -22,7 +22,7 @@ df_load = pd.read_csv('BA_load.csv',header=0)
 NODE_NUMBER = [50,75,100,125,150,175,200,225,250,275,300]
 #NODE_NUMBER = [175]
 
-UC_TREATMENTS = ['_simple','_coal']
+UC_TREATMENTS = ['_coal']
 # UC_TREATMENTS = ['_simple']
 
 # trans_p = [25]
@@ -440,7 +440,7 @@ for NN in NODE_NUMBER:
             nbs = []
             heat_rate = []
             f = []
-            thermal = ['NG (Natural Gas)','NUC (Nuclear)','BIT (Bituminous Coal)','NUC (Nuclear)']
+            thermal = ['NG (Natural Gas)','NUC (Nuclear)','BIT (Bituminous Coal)','DFO (Distillate Fuel Oil)']
             
             for n in NB:
                 sample = df_gens.loc[df_gens['NewBusNum'] == n]
