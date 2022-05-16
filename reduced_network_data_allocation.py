@@ -573,6 +573,7 @@ for NN in NODE_NUMBER:
             ramps = []
             minups = []
             mindns = []
+            losscaps = []
             
             must_nodes = []
             must_caps = []
@@ -620,6 +621,7 @@ for NN in NODE_NUMBER:
                     minups.append(minup)
                     mindns.append(mindn)
                     heat_rates.append(hr_2)
+                    losscaps.append(maxcap)
                     
                 else:
                     
@@ -648,6 +650,7 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0) 
                     heat_rates.append(0)
+                    losscaps.append(maxcap)
             
             # solar
             
@@ -669,6 +672,7 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0)   
                     heat_rates.append(0)
+                    losscaps.append(maxcap)
             
             # hydro
             
@@ -690,12 +694,14 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0)   
                     heat_rates.append(0)
+                    losscaps.append(maxcap)
             
             df_genparams = pd.DataFrame()
             df_genparams['name'] = names
             df_genparams['typ'] = typs
             df_genparams['node'] = nodes
             df_genparams['maxcap'] = maxcaps
+            df_genparams['losscap'] = maxcaps
             df_genparams['heat_rate'] = heat_rates
             df_genparams['mincap'] = mincaps
             df_genparams['var_om'] = var_oms
@@ -715,8 +721,7 @@ for NN in NODE_NUMBER:
             df_must.to_csv('must_run.csv',index=None)
             copy('must_run.csv',path)
             
-            
-            
+
             ######
             # create gen-to-bus matrix
             

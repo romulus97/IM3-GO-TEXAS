@@ -20,6 +20,33 @@ model.Thermal = model.Coal | model.Oil | model.Gas
 model.Generators = model.Thermal | model.Hydro | model.Solar | model.Wind
 model.Dispatchable = model.Hydro | model.Oil | model.Gas | model.Coal
 
+
+model.Gas_below_50 = Set()
+model.Gas_50_100 = Set()
+model.Gas_100_200 = Set()
+model.Gas_200_300 = Set()
+model.Gas_300_400 = Set()
+model.Gas_400_600 = Set()
+model.Gas_600_800 = Set()
+model.Gas_800_1000 = Set()
+model.Gas_ovr_1000 = Set()
+model.Gas_All_n_0_100 = Set()
+model.Gas_All_n_100_200 = Set()
+model.Gas_All_n_ovr_200 = Set()
+model.Coal_below_50 = Set()
+model.Coal_50_100 = Set()
+model.Coal_100_200 = Set()
+model.Coal_200_300 = Set()
+model.Coal_300_400 = Set()
+model.Coal_400_600 = Set()
+model.Coal_600_800 = Set()
+model.Coal_800_1000 = Set()
+model.Coal_ovr_1000 = Set()
+model.Coal_All_n_0_100 = Set()
+model.Coal_All_n_100_200 = Set()
+model.Coal_All_n_ovr_200 = Set()
+
+
 # transmission sets
 model.lines = Set() 
 model.buses = Set()
@@ -32,6 +59,8 @@ model.node = Param(model.Generators,within=Any)
 
 #Max capacity
 model.maxcap = Param(model.Generators)
+
+model.losscap = Param(model.Generators,mutable=True)
 
 #Min capacity
 model.mincap = Param(model.Generators)
@@ -194,7 +223,7 @@ model.RampCon2 = Constraint(model.Thermal,model.ramp_periods,rule=Ramp2)
 #####=========== Capacity Constraints ============##########
 # Constraints for Max & Min Capacity of dispatchable resources
 def MaxC(model,j,i):
-    return model.mwh[j,i]  <= model.maxcap[j] 
+    return model.mwh[j,i]  <= model.losscap[j] 
 model.MaxCap= Constraint(model.Dispatchable,model.hh_periods,rule=MaxC)
 
 
