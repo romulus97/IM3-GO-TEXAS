@@ -181,7 +181,7 @@ with open(''+str(data_name)+'.dat', 'w') as f:
 ######=================================================########
 ######               Unit outage sets                  ########
 ######=================================================########
-
+    df_dict= np.load('df_dict2.npy',allow_pickle='TRUE').item()  
 
     group_dict = pd.read_csv('df_dict.csv',header=None)
     group_list = list(group_dict[0])
