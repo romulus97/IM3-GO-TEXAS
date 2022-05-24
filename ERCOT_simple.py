@@ -47,6 +47,7 @@ model.Coal_All_n_100_200 = Set()
 model.Coal_All_n_ovr_200 = Set()
 
 
+
 # transmission sets
 model.lines = Set() 
 model.buses = Set()
