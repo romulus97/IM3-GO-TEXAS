@@ -51,7 +51,8 @@ duals=[]
 
 df_generators = pd.read_csv('data_genparams.csv',header=0)
 
-df_loss_dict = pd.read_csv('df_dict.csv',header=None,index_col=0)
+#df_loss_dict = pd.read_csv('df_dict.csv',header=None,index_col=0)
+df_loss_dict=df_dict= np.load('df_dict2.npy',allow_pickle='TRUE').item()
 
 df_losses = pd.read_csv('ercot_19_lostcap.csv',header=0,index_col=0)
 
@@ -163,7 +164,10 @@ for day in range(1,days):
         instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_ovr_200'])/len(list(df_loss_dict.loc['Coal_All_n_ovr_200',1]))) 
 
 ###
-   #  NEED TO ADD MUST RUN GENERATION OUTAGES     
+   #  NEED TO ADD MUST RUN GENERATION OUTAGES
+   #for z in instance.Must:
+       #instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_ovr_200'])/len(list(df_loss_dict.loc['Coal_All_n_ovr_200',1]))) 
+  
 ###        
 
 
