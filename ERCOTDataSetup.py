@@ -181,30 +181,54 @@ with open(''+str(data_name)+'.dat', 'w') as f:
 ######=================================================########
 ######               Unit outage sets                  ########
 ######=================================================########
-
-
-    group_dict = pd.read_csv('df_dict.csv',header=None)
-    group_list = list(group_dict[0])
+    df_dict= np.load('df_dict2.npy',allow_pickle='TRUE').item()
+    
+    group_list=df_dict.keys()
     
     for g in group_list:
         
-        idx = group_list.index(g)
         set_text = 'set ' + g + ' :='
-        
         f.write(set_text)
-        f.write('\n')
         
         # pull relevant generators
         
-        generators = list(group_dict.loc[idx,1])
+        generators= df_dict[g]
+        unit_name = unit_name.replace(' ','_')
+        f.write('\n')
+    
+        generators= df_dict[g]
         for n in generators:
             unit_name = n
             unit_name = unit_name.replace(' ','_')
             f.write(unit_name + ' ')
-        f.write(';\n\n') 
-    
-    
+        f.write(';\n\n')
     print('Outage sets')
+    
+    #Dr. Kern, I rewrote the code (see line 184-205) using guidance from your code
+    #It seems to be working fine
+    #I kept your code below in case I missed something
+    #group_dict = pd.read_csv('df_dict.csv',header=None)
+    #group_list = list(group_dict[0])
+    
+    #for g in group_list:
+        
+        #idx = group_list.index(g)
+        #set_text = 'set ' + g + ' :='
+        
+        #f.write(set_text)
+        #f.write('\n')
+        
+        # pull relevant generators
+        
+        #generators = list(group_dict.loc[idx,1])
+        #for n in generators:
+            #unit_name = n
+            #unit_name = unit_name.replace(' ','_')
+            #f.write(unit_name + ' ')
+        #f.write(';\n\n') 
+    
+    
+    #print('Outage sets')
     
 
 ######=================================================########
