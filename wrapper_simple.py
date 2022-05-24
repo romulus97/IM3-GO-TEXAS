@@ -164,7 +164,9 @@ for day in range(1,days):
 
 ###
    #  NEED TO ADD MUST RUN GENERATION OUTAGES     
-###        
+###
+    for z in instance.buses:
+        instance.Must_loss[z] = max(0,instance.Must[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Nuclear_ovr_1000'])/len(list(df_loss_dict.loc['Nuclear_ovr_1000',1])))        
 
 
 

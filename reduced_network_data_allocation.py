@@ -559,7 +559,7 @@ for NN in NODE_NUMBER:
             #########################################
             # Generator file setup
             
-            df_G = pd.read_csv('thermal_Gens.csv',header=0)
+            df_G = pd.read_csv('thermal_gens.csv',header=0)
             
             names = []
             typs = []

@@ -149,6 +149,7 @@ model.HorizonWind = Param(model.Wind,model.hh_periods,within=NonNegativeReals,mu
 
 #Must run resources
 model.Must = Param(model.buses,within=NonNegativeReals)
+model.Must_loss = Param(model.buses, within=NonNegativeReals,mutable=True)
 
 #Fuel prices over simulation period
 model.SimFuelPrice = Param(model.Thermal,model.SD_periods, within=NonNegativeReals)
@@ -263,7 +264,7 @@ def Nodal_Balance(model,z,i):
     power_flow = sum(model.Flow[l,i]*model.LinetoBusMap[l,z] for l in model.lines)   
     gen = sum(model.mwh[j,i]*model.BustoUnitMap[j,z] for j in model.Generators)    
     slack = model.S[z,i]
-    must_run = model.Must[z]
+    must_run = model.Must_loss[z]
     return gen + slack + must_run - power_flow == model.HorizonDemand[z,i] 
 model.Node_Constraint = Constraint(model.buses,model.hh_periods,rule=Nodal_Balance)
 
