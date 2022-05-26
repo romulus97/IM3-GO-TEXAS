@@ -972,4 +972,6 @@ for NN in NODE_NUMBER:
                 copy(milp,path)
                 copy(lp,path)
 
+            copy('df_dict2.npy',path)
+            copy('ercot_19_lostcap.csv',path)
     
