@@ -2,7 +2,8 @@
 
 # Set up conda environment
 
-conda activate /usr/local/usrapps/infews/CAPOW_env
+conda activate /usr/local/usrapps/infews/group_env
+
 
 # Submit multiple jobs at once
 

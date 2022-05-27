@@ -972,6 +972,13 @@ for NN in NODE_NUMBER:
                 copy(milp,path)
                 copy(lp,path)
 
-            copy('df_dict2.npy',path)
+            #copy('df_dict2.npy',path)
             copy('ercot_19_lostcap.csv',path)
+            #importing a function created in another script to generate a dictionary from the data_genparams file
+            from dict_creator import df_dict
+            df_loss_dict=df_dict(df_genparams)
+            #save the dictionary as a .npy file
+            np.save('df_dict2.npy', df_loss_dict)
+            copy('df_dict2.npy',path)
+            
     

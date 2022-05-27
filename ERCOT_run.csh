@@ -2,7 +2,7 @@
 
 # Set up conda and gurobi environment
 
-conda activate /usr/local/usrapps/infews/CAPOW_env
+conda activate /usr/local/usrapps/infews/group_env
 module load gurobi
 source /usr/local/apps/gurobi/gurobi810/linux64/bin/gurobi.sh
 
