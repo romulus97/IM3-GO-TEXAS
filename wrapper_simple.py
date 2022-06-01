@@ -16,7 +16,7 @@ import numpy as np
 from datetime import datetime
 import pyomo.environ as pyo
 
-days = 365 # Max = 365
+days = 5 # Max = 365
 
 instance = m1.create_instance('ERCOT_data.dat')
 instance.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)

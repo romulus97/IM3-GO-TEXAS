@@ -9,7 +9,7 @@ conda activate /usr/local/usrapps/infews/group_env
 
 set folNameBase = Exp
 
-foreach NN ( 75 100 125 150 175 200 225 250 275 300 )
+foreach NN ( 50 75 100 125 150 175 200 225 250 275 300 )
 
 	foreach UC ( _simple_ _coal_ )
 

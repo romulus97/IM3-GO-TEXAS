@@ -51,7 +51,12 @@ duals=[]
 
 df_generators = pd.read_csv('data_genparams.csv',header=0)
 
-df_loss_dict = pd.read_csv('df_dict.csv',header=None,index_col=0)
+df_thermal = pd.read_csv('thermal_gens.csv',header=0)
+
+nucs = df_thermal[df_thermal['Fuel']=='NUC (Nuclear)']
+
+#df_loss_dict = pd.read_csv('df_dict.csv',header=None,index_col=0)
+df_loss_dict=df_dict= np.load('df_dict2.npy',allow_pickle='TRUE').item()
 
 df_losses = pd.read_csv('ercot_19_lostcap.csv',header=0,index_col=0)
 
@@ -91,77 +96,82 @@ for day in range(1,days):
     # subtract real or historical capacity losses
         
     for z in instance.Gas_below_50:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_below_50'])/len(list(df_loss_dict.loc['Gas_below_50',1])))
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_below_50'])/len(df_loss_dict['Gas_below_50']))
 
     for z in instance.Gas_50_100:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_50_100'])/len(list(df_loss_dict.loc['Gas_50_100',1])))
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_50_100'])/len(df_loss_dict['Gas_50_100']))
 
     for z in instance.Gas_100_200:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_100_200'])/len(list(df_loss_dict.loc['Gas_100_200',1])))  
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_100_200'])/len(df_loss_dict['Gas_100_200']))  
 
     for z in instance.Gas_200_300:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_200_300'])/len(list(df_loss_dict.loc['Gas_200_300',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_200_300'])/len(df_loss_dict['Gas_200_300'])) 
 
     for z in instance.Gas_300_400:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_300_400'])/len(list(df_loss_dict.loc['Gas_300_400',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_300_400'])/len(df_loss_dict['Gas_300_400'])) 
 
     for z in instance.Gas_400_600:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_400_600'])/len(list(df_loss_dict.loc['Gas_400_600',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_400_600'])/len(df_loss_dict['Gas_400_600'])) 
 
     for z in instance.Gas_600_800:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_600_800'])/len(list(df_loss_dict.loc['Gas_600_800',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_600_800'])/len(df_loss_dict['Gas_600_800'])) 
 
     for z in instance.Gas_800_1000:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_800_1000'])/len(list(df_loss_dict.loc['Gas_800_1000',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_800_1000'])/len(df_loss_dict['Gas_800_1000'])) 
 
     for z in instance.Gas_ovr_1000:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_ovr_1000'])/len(list(df_loss_dict.loc['Gas_ovr_1000',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_ovr_1000'])/len(df_loss_dict['Gas_ovr_1000'])) 
 
     for z in instance.Gas_All_n_0_100:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_All_n_0_100'])/len(list(df_loss_dict.loc['Gas_All_n_0_100',1])))
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_All_n_0_100'])/len(df_loss_dict['Gas_All_n_0_100']))
 
     for z in instance.Gas_All_n_100_200:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_All_n_100_200'])/len(list(df_loss_dict.loc['Gas_All_n_100_200',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_All_n_100_200'])/len(df_loss_dict['Gas_All_n_100_200'])) 
 
     for z in instance.Gas_All_n_ovr_200:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_All_n_ovr_200'])/len(list(df_loss_dict.loc['Gas_All_n_ovr_200',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Gas_All_n_ovr_200'])/len(df_loss_dict['Gas_All_n_ovr_200'])) 
 
     for z in instance.Coal_below_50:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_below_50'])/len(list(df_loss_dict.loc['Coal_below_50',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_below_50'])/len(df_loss_dict['Coal_below_50'])) 
 
     for z in instance.Coal_50_100:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_50_100'])/len(list(df_loss_dict.loc['Coal_50_100',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_50_100'])/len(df_loss_dict['Coal_50_100'])) 
 
     for z in instance.Coal_100_200:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_100_200'])/len(list(df_loss_dict.loc['Coal_100_200',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_100_200'])/len(df_loss_dict['Coal_100_200'])) 
 
     for z in instance.Coal_200_300:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_200_300'])/len(list(df_loss_dict.loc['Coal_200_300',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_200_300'])/len(df_loss_dict['Coal_200_300'])) 
 
     for z in instance.Coal_300_400:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_300_400'])/len(list(df_loss_dict.loc['Coal_300_400',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_300_400'])/len(df_loss_dict['Coal_300_400'])) 
 
     for z in instance.Coal_400_600:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_400_600'])/len(list(df_loss_dict.loc['Coal_400_600',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_400_600'])/len(df_loss_dict['Coal_400_600'])) 
 
     for z in instance.Coal_600_800:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_600_800'])/len(list(df_loss_dict.loc['Coal_600_800',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_600_800'])/len(df_loss_dict['Coal_600_800'])) 
 
     for z in instance.Coal_800_1000:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_800_1000'])/len(list(df_loss_dict.loc['Coal_800_1000',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_800_1000'])/len(df_loss_dict['Coal_800_1000'])) 
 
     for z in instance.Coal_ovr_1000:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_ovr_1000'])/len(list(df_loss_dict.loc['Coal_ovr_1000',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_ovr_1000'])/len(df_loss_dict['Coal_ovr_1000'])) 
 
     for z in instance.Coal_All_n_0_100:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_0_100'])/len(list(df_loss_dict.loc['Coal_All_n_0_100',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_0_100'])/len(df_loss_dict['Coal_All_n_0_100'])) 
 
     for z in instance.Coal_All_n_100_200:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_100_200'])/len(list(df_loss_dict.loc['Coal_All_n_100_200',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_100_200'])/len(df_loss_dict['Coal_All_n_100_200'])) 
 
     for z in instance.Coal_All_n_ovr_200:
-        instance.losscap[z] = max(0, instance.losscap[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_ovr_200'])/len(list(df_loss_dict.loc['Coal_All_n_ovr_200',1]))) 
+        instance.losscap[z] = max(0, instance.losscap[z].value - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Coal_All_n_ovr_200'])/len(df_loss_dict['Coal_All_n_ovr_200'])) 
 
+###
+   #  NEED TO ADD MUST RUN GENERATION OUTAGES     
+###
+    for z in instance.buses:
+        instance.Must_loss[z] = max(0,instance.Must[z] - np.mean(df_losses.loc[(day-1)*24:(day-1)*24+23,'Nuclear_ovr_1000'])/len(nucs))        
 
 
     result = opt.solve(instance,tee=True,symbolic_solver_labels=True, load_solutions=False) ##,tee=True to check number of variables\n",
@@ -199,13 +209,13 @@ for day in range(1,days):
                 
                 if int(index[1]>0 and index[1]<25):
                     
-                    fuel_price = instance.FuelPrice[z].value
+                    # fuel_price = instance.FuelPrice[gen_name].value
                     
                     if index[0] in instance.Gas:
-                        marginal_cost = gen_heatrate*fuel_price
+                        # marginal_cost = gen_heatrate*fuel_price
                         mwh.append((index[0],'Gas',index[1]+((day-1)*24),varobject[index].value))   
                     elif index[0] in instance.Coal:
-                        marginal_cost = gen_heatrate*fuel_price
+                        # marginal_cost = gen_heatrate*fuel_price
                         mwh.append((index[0],'Coal',index[1]+((day-1)*24),varobject[index].value))  
                     elif index[0] in instance.Oil:
                         mwh.append((index[0],'Oil',index[1]+((day-1)*24),varobject[index].value))   

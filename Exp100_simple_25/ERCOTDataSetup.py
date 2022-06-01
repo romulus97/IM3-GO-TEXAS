@@ -8,7 +8,7 @@ import numpy as np
 ######               Segment A.1                       ########
 ######=================================================########
 
-SimDays = 365
+SimDays = 3
 SimHours = SimDays * 24
 HorizonHours = 24  ##planning horizon (e.g., 24, 48, 72 hours etc.)
 # TransLoss = 0.075  ##transmission loss as a percent of generation
