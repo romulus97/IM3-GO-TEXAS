@@ -12,7 +12,7 @@ set folNameBase = Exp
 
 foreach NN ( 50 75 100 125 150 175 200 225 250 275 300 )
 
-	foreach UC ( _simple_ _coal_ )
+	foreach UC ( _simple_)# _coal_ )
 
 		foreach TC ( 25 50 75 100 )
 

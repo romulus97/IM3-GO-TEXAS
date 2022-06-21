@@ -7,7 +7,7 @@ Created on Fri May 27 15:33:18 2022
 import numpy as np
 import pandas as pd
 
-def dict_func(dataset):
+def dict_funct(dataset):
     def gencat(row):  
         if row['maxcap'] <= 50 :
             return "below_50"

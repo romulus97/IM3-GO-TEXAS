@@ -10,6 +10,9 @@ import sklearn
 import math
 #%matplotlib inline
 import matplotlib.pyplot as plt
+import os
+from shutil import copy
+from pathlib import Path
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -135,10 +138,10 @@ a_300_399=[]
 a_400_599=[]
 a_600_799=[]
 a_800_999=[]
-a_1k_plus=[]
+a_ovr_1k=[]
 
 ## "All" and ">200"
-a_all_200=[]
+a_all_n_ovr_200=[]
 
 for i in ercot_gens["MWMax"]:
     if i < 50:
@@ -158,7 +161,7 @@ for i in ercot_gens["MWMax"]:
     elif i < 1000:
         a_800_999.append(i)
     else:
-        a_1k_plus.append(i)
+        a_ovr_1k.append(i)
         
 
 #median of each category
@@ -170,25 +173,26 @@ md_300_399=median(a_300_399)
 md_400_599=median(a_400_599)
 md_600_799=median(a_600_799)
 md_800_999=median(a_800_999)
-md_1k_plus=median(a_1k_plus)
+md_ovr_1k=median(a_ovr_1k)
 
 
 # "All" and ">200"
 for i in ercot_gens["MWMax"]:
     if i >= 200:
-        a_all_200.append(i)
+        a_all_n_ovr_200.append(i)
 #median for all gens with maxcap >=200         
-md_all_200=median(a_all_200)     
-md_all_200 
+md_all_n_ovr_200=median(a_all_n_ovr_200)     
+
 
 
 # 0-100 category
 a_0_99=[]
 
 for i in ercot_gens["MWMax"]:
-    if i < 200:
+    if i < 100:
         a_0_99.append(i)
 md_0_99=median(a_0_99)        
+     
        
 
        
@@ -197,7 +201,7 @@ md_0_99=median(a_0_99)
 #adding a new column for new est cap
 def categorise(row):  
     if row['RatingMW_BrochureGroup'] == "All" and row['RatingMW_grp'] == 3.0:
-        return md_all_200
+        return md_all_n_ovr_200
     elif row['RatingMW_BrochureGroup'] == "All" and row['RatingMW_grp'] == 2.0:
         return md_100_199
     elif row['RatingMW_BrochureGroup'] == "All" and row['RatingMW_grp'] == 1.0:
@@ -221,7 +225,8 @@ def categorise(row):
     elif row['RatingMW_BrochureGroup'] == "800+":
         return md_800_999
     elif row['RatingMW_BrochureGroup'] == "1000+":
-        return md_1k_plus
+        return md_ovr_1k
+
 
     #else:
        # return 0
@@ -261,6 +266,7 @@ def new_row_name(row):
         return "ovr_1000"
     
 gads_ercot_19['class_category'] = gads_ercot_19.apply(lambda row: new_row_name(row), axis=1)
+
 
 #..................................................................................................................................
 
@@ -361,14 +367,17 @@ ercot_19_lostcap
 
 
 #add a new column with hours from 1 to 8760
-ercot_19_lostcap.insert(0, "Time", range(1, 1 + len(ercot_19_lostcap)))
-ercot_19_lostcap
+#ercot_19_lostcap.insert(0, "Time", range(1, 1 + len(ercot_19_lostcap)))
+#ercot_19_lostcap
 
 
 #cutting off everything greater than 8760
 #keep only rows with time from 1 to 8760
 ercot_19_lostcap=ercot_19_lostcap.iloc[0:8760, :]
 
+#save as a csv
+ercot_19_lostcap.to_csv('ercot_19_lostcap.csv',index=None)
+#copy('ercot_19_lostcap.csv',path)
 
 #hourly_sum_lostcap
 hourly_sum_lostcap=ercot_19_lostcap.sum(axis=1)
@@ -529,7 +538,10 @@ for i in range(0, len(datagen)):
         Ga_ovr_1000.append(datagen.loc[i,"name"])
     if datagen.loc[i,"typ"]=="coal" and datagen.loc[i,"gen_categ"]=="ovr_1000" :
         Co_ovr_1000.append(datagen.loc[i,"name"])
+    
+
         
+for i in range(0, len(datagen)):               
     if datagen.loc[i,"typ"]=="ngcc" and datagen.loc[i,"maxcap"]<=100 :
         Ga_All_n_0_100.append(datagen.loc[i,"name"])
     elif datagen.loc[i,"typ"]=="coal" and datagen.loc[i,"maxcap"]<=100 :
@@ -542,6 +554,7 @@ for i in range(0, len(datagen)):
         Ga_All_n_ovr_200.append(datagen.loc[i,"name"])
     elif datagen.loc[i,"typ"]=="coal" and datagen.loc[i,"maxcap"]>200 :
         Co_All_n_ovr_200.append(datagen.loc[i,"name"])
+        
 #.....................................................................................................
 
 #Dictionary
@@ -584,5 +597,18 @@ Dict["Coal_All_n_0_100"] = Co_All_n_0_100
 Dict["Coal_All_n_100_200"] = Co_All_n_100_200
 Dict["Coal_All_n_ovr_200"]= Co_All_n_ovr_200
 
+#save as dictionary
+#np.save('df_dict2.npy', Dict) 
 
+#import csv
+#new_path = open(r'C:\Users\hssemba\Documents\GitHub\gen_outage_analysis\df_dict.csv', "w")
+#z = csv.writer(new_path)
 
+#for new_k, new_v in Dict.items():
+#    z.writerow([new_k, new_v])
+
+#new_path.close()
+
+datagen2=datagen
+from dict_creator import dict_funct
+df_loss_dict=dict_funct(datagen2)
