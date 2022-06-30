@@ -52,7 +52,7 @@ duals=[]
 df_generators = pd.read_csv('data_genparams.csv',header=0)
 
 #max here can be (1,365)
-for day in range(1,days):
+for day in range(1,days+1):
     
     for z in instance.buses:
     #load Demand and Reserve time series data
