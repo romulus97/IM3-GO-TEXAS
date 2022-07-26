@@ -19,14 +19,19 @@ from pathlib import Path
 df_load = pd.read_csv('BA_load.csv',header=0)
 
 # NODE_NUMBER = [200,225,250,275,300]
-NODE_NUMBER = [50,75,100,125,150,175,200,225,250,275,300]
-#NODE_NUMBER = [175]
+NODE_NUMBER = [50]
+#NODE_NUMBER = [100]
 
+<<<<<<< HEAD
+#UC_TREATMENTS = ['_coal']
 UC_TREATMENTS = ['_coal']
-# UC_TREATMENTS = ['_simple']
+=======
+UC_TREATMENTS = ['_coal']
+#UC_TREATMENTS = ['_simple']
+>>>>>>> 0fa6d5575e6b9a53ca351e67b8e12300ed9ec87b
 
-# trans_p = [25]
-trans_p = [25,50,75,100]
+#trans_p = [25]
+trans_p = [25]
 
 df_full = pd.read_csv('ERCOT_Bus.csv',header=0)
 
@@ -416,21 +421,52 @@ for NN in NODE_NUMBER:
             df_gens_heat_rate['NewBusNum'] = NB_hr
     
             names = list(df_gens['BusName'])
+            fts = list(df_gens['FuelType'])
             names_hr = list(df_gens_heat_rate['BusName'])
             
             # remove numbers and spaces
             for n in names:
                 i = names.index(n)
                 corrected = re.sub(r'[^A-Z]',r'',n)
+                f = fts[i]
+                if f == 'NUC (Nuclear)':
+                    f = 'Nuc'
+                elif f == 'NG (Natural Gas)':
+                    f = 'NG'
+                elif f == 'BIT (Bituminous Coal)':
+                    f = 'NG'
+                elif f == 'SUN (Solar)':
+                    f = 'S'
+                elif f == 'WAT (Water)':
+                    f = 'H'
+                elif f == 'WND (Wind)':
+                    f = 'W'
+                    
+                corrected = corrected + '_' + f
                 names[i] = corrected
                 
             for n in names_hr:
                 i = names_hr.index(n)
                 corrected = re.sub(r'[^A-Z]',r'',n)
+                f = fts[i]
+                if f == 'NUC (Nuclear)':
+                    f = 'Nuc'
+                elif f == 'NG (Natural Gas)':
+                    f = 'NG'
+                elif f == 'BIT (Bituminous Coal)':
+                    f = 'NG'
+                elif f == 'SUN (Solar)':
+                    f = 'S'
+                elif f == 'WAT (Water)':
+                    f = 'H'
+                elif f == 'WND (Wind)':
+                    f = 'W'
+                    
+                corrected = corrected + '_' + f
                 names_hr[i] = corrected
-            
+          
             df_gens['PlantNames'] = names
-            df_gens_heat_rate['PlantNames'] = names_hr
+            df_gens_heat_rate['PlantNames'] = names_hr            
             
             NB = df_gens['NewBusNum'].unique()
             plants = []
@@ -559,7 +595,7 @@ for NN in NODE_NUMBER:
             #########################################
             # Generator file setup
             
-            df_G = pd.read_csv('thermal_Gens.csv',header=0)
+            df_G = pd.read_csv('thermal_gens.csv',header=0)
             
             names = []
             typs = []
@@ -573,6 +609,7 @@ for NN in NODE_NUMBER:
             ramps = []
             minups = []
             mindns = []
+            losscaps = []
             
             must_nodes = []
             must_caps = []
@@ -620,6 +657,7 @@ for NN in NODE_NUMBER:
                     minups.append(minup)
                     mindns.append(mindn)
                     heat_rates.append(hr_2)
+                    losscaps.append(maxcap)
                     
                 else:
                     
@@ -648,6 +686,7 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0) 
                     heat_rates.append(0)
+                    losscaps.append(maxcap)
             
             # solar
             
@@ -669,6 +708,7 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0)   
                     heat_rates.append(0)
+                    losscaps.append(maxcap)
             
             # hydro
             
@@ -690,12 +730,14 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0)   
                     heat_rates.append(0)
+                    losscaps.append(maxcap)
             
             df_genparams = pd.DataFrame()
             df_genparams['name'] = names
             df_genparams['typ'] = typs
             df_genparams['node'] = nodes
             df_genparams['maxcap'] = maxcaps
+            df_genparams['losscap'] = maxcaps
             df_genparams['heat_rate'] = heat_rates
             df_genparams['mincap'] = mincaps
             df_genparams['var_om'] = var_oms
@@ -715,8 +757,7 @@ for NN in NODE_NUMBER:
             df_must.to_csv('must_run.csv',index=None)
             copy('must_run.csv',path)
             
-            
-            
+
             ######
             # create gen-to-bus matrix
             
@@ -967,4 +1008,13 @@ for NN in NODE_NUMBER:
                 copy(milp,path)
                 copy(lp,path)
 
+            
+            copy('ercot_19_lostcap.csv',path)
+            #importing a function created in another script to generate a dictionary from the data_genparams file
+            from dict_creator import dict_funct
+            df_loss_dict=dict_funct(df_genparams)
+            #save the dictionary as a .npy file
+            np.save('df_dict2.npy', df_loss_dict)
+            copy('df_dict2.npy',path)
+            
     
