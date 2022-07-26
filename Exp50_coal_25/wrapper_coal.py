@@ -18,13 +18,13 @@ from datetime import datetime
 import pyomo.environ as pyo
 from pyomo.environ import value
 
-days = 365 # Max = 365
+days = 2 # Max = 365
 
 instance = m1.create_instance('ERCOT_data.dat')
 instance2 = m2.create_instance('ERCOT_data.dat')
 instance2.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
 
-Solvername = 'gurobi'
+Solvername = 'cplex'
 Timelimit = 1800 # for the simulation of one day in seconds
 # Threadlimit = 8 # maximum number of threads to use
 
@@ -269,26 +269,26 @@ for day in range(1,days):
                 
                 if int(index[1]>0 and index[1]<25):
                     
-                    fuel_price = instance.FuelPrice[z].value
+                    # fuel_price = instance.FuelPrice[z].value
 
                     if index[0] in instance.Gas:
-                        marginal_cost = gen_heatrate*fuel_price
-                        mwh.append((index[0],'Gas',index[1]+((day-1)*24),varobject[index].value,marginal_cost))   
+                        # marginal_cost = gen_heatrate*fuel_price
+                        mwh.append((index[0],'Gas',index[1]+((day-1)*24),varobject[index].value))   
                     elif index[0] in instance.Coal:
-                        marginal_cost = gen_heatrate*fuel_price
-                        mwh.append((index[0],'Coal',index[1]+((day-1)*24),varobject[index].value,marginal_cost))  
+                        # marginal_cost = gen_heatrate*fuel_price
+                        mwh.append((index[0],'Coal',index[1]+((day-1)*24),varobject[index].value))  
                     elif index[0] in instance.Oil:
-                        marginal_cost = 0 #changed
-                        mwh.append((index[0],'Oil',index[1]+((day-1)*24),varobject[index].value,marginal_cost))   
+                        # marginal_cost = 0 #changed
+                        mwh.append((index[0],'Oil',index[1]+((day-1)*24),varobject[index].value))   
                     elif index[0] in instance.Hydro:
-                        marginal_cost = 0 #changed
-                        mwh.append((index[0],'Hydro',index[1]+((day-1)*24),varobject[index].value,marginal_cost)) 
+                        # marginal_cost = 0 #changed
+                        mwh.append((index[0],'Hydro',index[1]+((day-1)*24),varobject[index].value)) 
                     elif index[0] in instance.Solar:
-                        marginal_cost = 0 #changed
-                        mwh.append((index[0],'Solar',index[1]+((day-1)*24),varobject[index].value,marginal_cost))
+                        # marginal_cost = 0 #changed
+                        mwh.append((index[0],'Solar',index[1]+((day-1)*24),varobject[index].value))
                     elif index[0] in instance.Wind:
-                        marginal_cost = 0 #changed
-                        mwh.append((index[0],'Wind',index[1]+((day-1)*24),varobject[index].value,marginal_cost))                                            
+                        # marginal_cost = 0 #changed
+                        mwh.append((index[0],'Wind',index[1]+((day-1)*24),varobject[index].value))                                            
         
         if a=='on':  
             for index in varobject:
