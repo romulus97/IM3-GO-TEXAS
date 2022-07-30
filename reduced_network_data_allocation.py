@@ -22,13 +22,9 @@ df_load = pd.read_csv('BA_load.csv',header=0)
 NODE_NUMBER = [50]
 #NODE_NUMBER = [100]
 
-<<<<<<< HEAD
 #UC_TREATMENTS = ['_coal']
 UC_TREATMENTS = ['_coal']
-=======
-UC_TREATMENTS = ['_coal']
 #UC_TREATMENTS = ['_simple']
->>>>>>> 0fa6d5575e6b9a53ca351e67b8e12300ed9ec87b
 
 #trans_p = [25]
 trans_p = [25]
@@ -423,6 +419,7 @@ for NN in NODE_NUMBER:
             names = list(df_gens['BusName'])
             fts = list(df_gens['FuelType'])
             names_hr = list(df_gens_heat_rate['BusName'])
+            fts_hr = list(df_gens_heat_rate['BusName'])
             
             # remove numbers and spaces
             for n in names:
@@ -434,7 +431,7 @@ for NN in NODE_NUMBER:
                 elif f == 'NG (Natural Gas)':
                     f = 'NG'
                 elif f == 'BIT (Bituminous Coal)':
-                    f = 'NG'
+                    f = 'C'
                 elif f == 'SUN (Solar)':
                     f = 'S'
                 elif f == 'WAT (Water)':
@@ -448,13 +445,13 @@ for NN in NODE_NUMBER:
             for n in names_hr:
                 i = names_hr.index(n)
                 corrected = re.sub(r'[^A-Z]',r'',n)
-                f = fts[i]
+                f = fts_hr[i]
                 if f == 'NUC (Nuclear)':
                     f = 'Nuc'
                 elif f == 'NG (Natural Gas)':
                     f = 'NG'
                 elif f == 'BIT (Bituminous Coal)':
-                    f = 'NG'
+                    f = 'C'
                 elif f == 'SUN (Solar)':
                     f = 'S'
                 elif f == 'WAT (Water)':
