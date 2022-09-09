@@ -18,7 +18,7 @@ from datetime import datetime
 import pyomo.environ as pyo
 from pyomo.environ import value
 
-days = 2 # Max = 365
+days = 365 # Max = 365
 
 instance = m1.create_instance('ERCOT_data.dat')
 instance2 = m2.create_instance('ERCOT_data.dat')
@@ -66,7 +66,7 @@ df_losses = pd.read_csv('ercot_19_lostcap.csv',header=0,index_col=0)
 
 
 #max here can be (1,365)
-for day in range(1,days):
+for day in range(1,days+1):
     
     for z in instance.buses:
     #load Demand and Reserve time series data
