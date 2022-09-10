@@ -932,7 +932,7 @@ for NN in NODE_NUMBER:
             # FUEL PRICES
             
             # Natural gas prices
-            NG_price = pd.read_csv('gas_prices.csv', header=0)
+            NG_price = pd.read_csv('gas_prices.csv', header=0,index_col=None)
             buses = list(df_selected['bus_i'])
             for bus in buses:
                 
