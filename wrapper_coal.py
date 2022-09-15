@@ -24,7 +24,8 @@ instance = m1.create_instance('ERCOT_data.dat')
 instance2 = m2.create_instance('ERCOT_data.dat')
 instance2.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
 
-Solvername = 'cplex'
+Solvername = 'gurobi'
+#Solvername = 'cplex'
 Timelimit = 1800 # for the simulation of one day in seconds
 # Threadlimit = 8 # maximum number of threads to use
 
