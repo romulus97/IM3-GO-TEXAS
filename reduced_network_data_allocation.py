@@ -381,7 +381,7 @@ for NN in NODE_NUMBER:
             
             df_gens = pd.read_csv('ERCOT_Generators.csv',header=0)
             df_gens = df_gens.replace('', np.nan, regex=True)
-            df_gens_heat_rate = pd.read_csv('ERCOT_Heat_Rates.csv',header=0)
+            df_gens_heat_rate = pd.read_csv('ng_coal_ERCOT_Heat_Rates.csv',header=0)
             old_bus_num =[]
             new_bus_num = []
             NB = []
@@ -606,7 +606,7 @@ for NN in NODE_NUMBER:
             ramps = []
             minups = []
             mindns = []
-            losscaps = []
+
             
             must_nodes = []
             must_caps = []
@@ -654,7 +654,7 @@ for NN in NODE_NUMBER:
                     minups.append(minup)
                     mindns.append(mindn)
                     heat_rates.append(hr_2)
-                    losscaps.append(maxcap)
+
                     
                 else:
                     
@@ -683,7 +683,7 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0) 
                     heat_rates.append(0)
-                    losscaps.append(maxcap)
+               
             
             # solar
             
@@ -705,7 +705,7 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0)   
                     heat_rates.append(0)
-                    losscaps.append(maxcap)
+ 
             
             # hydro
             
@@ -727,14 +727,14 @@ for NN in NODE_NUMBER:
                     minups.append(0)
                     mindns.append(0)   
                     heat_rates.append(0)
-                    losscaps.append(maxcap)
+ 
             
             df_genparams = pd.DataFrame()
             df_genparams['name'] = names
             df_genparams['typ'] = typs
             df_genparams['node'] = nodes
             df_genparams['maxcap'] = maxcaps
-            df_genparams['losscap'] = maxcaps
+
             df_genparams['heat_rate'] = heat_rates
             df_genparams['mincap'] = mincaps
             df_genparams['var_om'] = var_oms
