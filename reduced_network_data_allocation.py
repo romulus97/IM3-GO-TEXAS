@@ -4,6 +4,7 @@ Spyder Editor
 
 This is a temporary script file.
 """
+#Note: 1. This script is using adjusted average heat rates of 7.72 MMBTU/Mwh for gas and 10.55 MMBTU/Mwh for coal (EIA)
 
 import pandas as pd
 import math
@@ -18,16 +19,16 @@ from pathlib import Path
 
 df_load = pd.read_csv('BA_load.csv',header=0)
 
-# NODE_NUMBER = [200,225,250,275,300]
-NODE_NUMBER = [50]
+NODE_NUMBER = NODE_NUMBER = [50,75,100,125,150,175,200,225,250,275,300]
+#NODE_NUMBER = [50]
 #NODE_NUMBER = [100]
 
-#UC_TREATMENTS = ['_coal']
 UC_TREATMENTS = ['_coal']
+#UC_TREATMENTS = ['_coal', '_simple']
 #UC_TREATMENTS = ['_simple']
 
 #trans_p = [25]
-trans_p = [25]
+trans_p = [25,50,75,100]
 
 df_full = pd.read_csv('ERCOT_Bus.csv',header=0)
 

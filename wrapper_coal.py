@@ -103,10 +103,9 @@ for day in range(1,days+1):
         instance.FuelPrice[z] = instance.SimFuelPrice[z,day]
         instance2.FuelPrice[z] = instance.SimFuelPrice[z,day]
     
-    
-    for z in instance.Thermal:
-        instance.losscap[z] = instance.maxcap[z]
-        instance2.losscap[z] = instance.maxcap[z]
+
+
+
     
     #Organizing outage data
     #load gen and mustrun capacity time series data

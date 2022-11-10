@@ -91,8 +91,6 @@ for day in range(1,days+1):
     #load fuel prices for thermal generators
         instance.FuelPrice[z] = instance.SimFuelPrice[z,day]
         
-    for z in instance.Thermal:
-        instance.losscap[z] = instance.maxcap[z]
 
     #Organizing outage data
     #load gen and mustrun capacity time series data

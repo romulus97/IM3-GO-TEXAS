@@ -26,6 +26,10 @@ data_name = 'ERCOT_data'
 #read parameters for dispatchable resources
 df_gen = pd.read_csv('data_genparams.csv',header=0)
 
+#added
+thermal_generators_df = df_gen.loc[(df_gen['typ']=='coal') | (df_gen['typ']=='ngcc')].copy()
+thermal_generators_names = [*thermal_generators_df['name']]
+
 #read generation and transmission data
 df_bustounitmap = pd.read_csv('gen_mat.csv',header=0)
 df_linetobusmap = pd.read_csv('line_to_bus.csv',header=0)
@@ -90,13 +94,17 @@ h3 = df_must.columns
 ## Fuel prices at substation-level
 df_fuel = pd.read_csv('Fuel_prices.csv',header=0)
 
+
+
+
 ######=================================================########
 ######               Segment A.3                       ########
 ######=================================================########
 
-####======== Lists of Nodes of the Power System ========#######
+####======== Lists of Nodes and Thermal Units of the Power System ========#######
 
 all_nodes = list(df_load.columns)
+
 all_thermals = list(df_fuel.columns)
 
 
@@ -268,6 +276,26 @@ with open(''+str(data_name)+'.dat', 'w') as f:
         f.write('\n')
     f.write(';\n\n')     
     
+    #Hourly generator capacity
+    f.write('param:' + '\t' + 'SimGenLimit:=' + '\n')
+    for z in thermal_generators_names:
+        thermal_gen_capacity = thermal_generators_df.loc[thermal_generators_df['name']==z]['maxcap'].values[0]
+        for h in range(0,8760):
+            f.write(z + '\t' + str(h+1) + '\t' + str(thermal_gen_capacity) + '\n')
+    f.write(';\n\n')
+    
+    #Hourly mustrun capacity
+    f.write('param:' + '\t' + 'SimMustrunLimit:=' + '\n')
+    for z in all_nodes:  
+        if z in h3:
+            for h in range(0,8760):
+                f.write(z + '\t' + str(h+1) + '\t' + str(df_must.loc[0,z]) + '\n')
+        else:
+            for h in range(0,8760):
+                f.write(z + '\t' + str(h+1) + '\t' + str(0) + '\n')
+    f.write(';\n\n')
+     
+    
     print('Gen params')
 
 ######=================================================########
@@ -345,15 +373,6 @@ with open(''+str(data_name)+'.dat', 'w') as f:
     
     print('hydro')
 
-####### Nodal must run
-     
-    f.write('param:' + '\t' + 'Must:=' + '\n')
-    for z in all_nodes:
-        if z in h3:
-            f.write(z + '\t' + str(df_must.loc[0,z]) + '\n')
-        else:
-            f.write(z + '\t' + str(0) + '\n')
-    f.write(';\n\n')
     
     
 ##    # solar (hourly)
