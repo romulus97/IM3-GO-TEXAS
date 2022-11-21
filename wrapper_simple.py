@@ -16,7 +16,7 @@ import numpy as np
 from datetime import datetime
 import pyomo.environ as pyo
 
-days =365 # Max = 365
+days =2 # Max = 365
 
 instance = m1.create_instance('ERCOT_data.dat')
 instance.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
@@ -94,7 +94,7 @@ for day in range(1,days+1):
 
     #Organizing outage data
     #load gen and mustrun capacity time series data
-    for z in instance.Thermal:
+    for z in instance.Outage:
         for i in K:
             instance.HorizonGenLimit[z,i] = instance.SimGenLimit[z,(day-1)*24+i]
     

@@ -103,14 +103,13 @@ for day in range(1,days+1):
         instance.FuelPrice[z] = instance.SimFuelPrice[z,day]
         instance2.FuelPrice[z] = instance.SimFuelPrice[z,day]
     
-    
-    for z in instance.Thermal:
-        instance.losscap[z] = instance.maxcap[z]
-        instance2.losscap[z] = instance.maxcap[z]
+
+
+
     
     #Organizing outage data
     #load gen and mustrun capacity time series data
-    for z in instance.Thermal:
+    for z in instance.Outage:
         for i in K:
             instance.HorizonGenLimit[z,i] = instance.SimGenLimit[z,(day-1)*24+i]
             instance2.HorizonGenLimit[z,i] = instance.SimGenLimit[z,(day-1)*24+i]        
