@@ -23,9 +23,9 @@ NODE_NUMBER = NODE_NUMBER = [50,75,100,125,150,175,200,225,250,275,300]
 #NODE_NUMBER = [50]
 #NODE_NUMBER = [100]
 
-UC_TREATMENTS = ['_coal']
+#UC_TREATMENTS = ['_coal']
 #UC_TREATMENTS = ['_coal', '_simple']
-#UC_TREATMENTS = ['_simple']
+UC_TREATMENTS = ['_simple']
 
 #trans_p = [25]
 trans_p = [25,50,75,100]

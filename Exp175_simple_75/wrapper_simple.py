@@ -59,7 +59,7 @@ nucs = df_thermal[df_thermal['Fuel']=='NUC (Nuclear)']
 #df_loss_dict = pd.read_csv('df_dict.csv',header=None,index_col=0)
 df_loss_dict=np.load('df_dict2.npy',allow_pickle='TRUE').item()
 
-df_losses = pd.read_csv('ercot_19_lostcap.csv',header=0,index_col=0)
+df_losses = pd.read_csv('ercot_19_lostcap_ta.csv',header=0,index_col=0)
 
 #max here can be (1,365)
 for day in range(1,days+1):
