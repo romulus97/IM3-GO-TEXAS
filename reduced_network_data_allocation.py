@@ -4,7 +4,6 @@ Spyder Editor
 
 This is a temporary script file.
 """
-#Note: 1. This script is using adjusted average heat rates of 7.72 MMBTU/Mwh for gas and 10.55 MMBTU/Mwh for coal (EIA)
 
 import pandas as pd
 import math
