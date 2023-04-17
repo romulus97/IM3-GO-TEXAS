@@ -23,8 +23,8 @@ NODE_NUMBER = NODE_NUMBER = [50,75,100,125,150,175,200,225,250,275,300]
 #NODE_NUMBER = [100]
 
 #UC_TREATMENTS = ['_coal']
-#UC_TREATMENTS = ['_coal', '_simple']
-UC_TREATMENTS = ['_simple']
+UC_TREATMENTS = ['_coal', '_simple']
+#UC_TREATMENTS = ['_simple']
 
 #trans_p = [25]
 trans_p = [25,50,75,100]
@@ -160,7 +160,7 @@ for NN in NODE_NUMBER:
             ##################################
             # WIND ALLOCATION TO NODE
                        
-            df_gen = pd.read_csv('ERCOT_Generators.csv',header=0)
+            df_gen = pd.read_csv('ERCOT_Generators_egridhtrtadjusted.csv',header=0)
             MWMax = []
             fuel_type = []
             nums = list(df_gen['BusNum'])
@@ -379,9 +379,9 @@ for NN in NODE_NUMBER:
             
             import re
             
-            df_gens = pd.read_csv('ERCOT_Generators.csv',header=0)
+            df_gens = pd.read_csv('ERCOT_Generators_egridhtrtadjusted.csv',header=0)
             df_gens = df_gens.replace('', np.nan, regex=True)
-            df_gens_heat_rate = pd.read_csv('ng_coal_ERCOT_Heat_Rates.csv',header=0)
+            df_gens_heat_rate = pd.read_csv('egridadjusted_ERCOT_Heat_Rates.csv',header=0)
             old_bus_num =[]
             new_bus_num = []
             NB = []
