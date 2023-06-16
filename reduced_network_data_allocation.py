@@ -20,10 +20,10 @@ df_load = pd.read_csv('BA_load.csv',header=0)
 
 NODE_NUMBER = NODE_NUMBER = [50,75,100,125,150,175,200,225,250,275,300]
 #NODE_NUMBER = [50]
-#NODE_NUMBER = [100]
+#NODE_NUMBER = [300]
 
-#UC_TREATMENTS = ['_coal']
-UC_TREATMENTS = ['_coal', '_simple']
+UC_TREATMENTS = ['_coal']
+#UC_TREATMENTS = ['_coal', '_simple']
 #UC_TREATMENTS = ['_simple']
 
 #trans_p = [25]
@@ -1006,7 +1006,7 @@ for NN in NODE_NUMBER:
                 copy(lp,path)
 
             
-            copy('ercot_19_lostcap_ta.csv',path)
+            copy('ercot_2019_lostcap_v3.csv',path)
             #importing a function created in another script to generate a dictionary from the data_genparams file
             from dict_creator import dict_funct
             df_loss_dict=dict_funct(df_genparams)
