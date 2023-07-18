@@ -23,7 +23,7 @@ instance.dual = pyo.Suffix(direction=pyo.Suffix.IMPORT)
 
 Solvername = 'gurobi'
 Timelimit = 1800 # for the simulation of one day in seconds
-# Threadlimit = 8 # maximum number of threads to use
+Threadlimit = 4 # maximum number of threads to use
 
 opt = SolverFactory(Solvername)
 if Solvername == 'cplex':
@@ -31,7 +31,7 @@ if Solvername == 'cplex':
 elif Solvername == 'gurobi':           
     opt.options['TimeLimit'] = Timelimit
     
-# opt.options['threads'] = Threadlimit
+opt.options['threads'] = Threadlimit
 
 H = instance.HorizonHours
 D = 2
@@ -59,7 +59,7 @@ nucs = df_thermal[df_thermal['Fuel']=='NUC (Nuclear)']
 #df_loss_dict = pd.read_csv('df_dict.csv',header=None,index_col=0)
 df_loss_dict=np.load('df_dict2.npy',allow_pickle='TRUE').item()
 
-df_losses = pd.read_csv('ercot_2019_lostcap_v3.csv',header=0,index_col=0)
+df_losses = pd.read_csv('ercot2019_lostcap_v3.csv',header=0,index_col=0)
 
 #max here can be (1,365)
 for day in range(1,days+1):

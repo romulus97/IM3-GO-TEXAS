@@ -1006,7 +1006,7 @@ for NN in NODE_NUMBER:
                 copy(lp,path)
 
             
-            copy('ercot_2019_lostcap_v3.csv',path)
+            copy('ercot2019_lostcap_v3.csv',path)
             #importing a function created in another script to generate a dictionary from the data_genparams file
             from dict_creator import dict_funct
             df_loss_dict=dict_funct(df_genparams)
