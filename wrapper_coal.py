@@ -55,14 +55,12 @@ duals=[]
 
 
 df_generators = pd.read_csv('data_genparams.csv',header=0)
-
 df_thermal = pd.read_csv('thermal_gens.csv',header=0)
 
 nucs = df_thermal[df_thermal['Fuel']=='NUC (Nuclear)']
 
-#df_loss_dict = pd.read_csv('df_dict.csv',header=None,index_col=0)
+#Outage
 df_loss_dict= np.load('df_dict2.npy',allow_pickle='TRUE').item()
-
 df_losses = pd.read_csv('ercot2019_lostcap_v3.csv',header=0,index_col=0)
 
 
