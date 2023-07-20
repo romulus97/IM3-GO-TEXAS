@@ -1,5 +1,7 @@
 # coding: utf-8
 from pyomo.environ import *
+from pyomo.environ import value
+import numpy as np
 
 model = AbstractModel()
 
@@ -20,6 +22,33 @@ model.Thermal = model.Coal | model.Oil | model.Gas
 model.Generators = model.Thermal | model.Hydro | model.Solar | model.Wind
 model.Dispatchable = model.Hydro | model.Oil 
 model.UC = model.Coal | model.Gas
+model.Outage = model.Coal | model.Gas
+
+#Outage sets
+model.Gas_below_50 = Set()
+model.Gas_50_100 = Set()
+model.Gas_100_200 = Set()
+model.Gas_200_300 = Set()
+model.Gas_300_400 = Set()
+model.Gas_400_600 = Set()
+model.Gas_600_800 = Set()
+model.Gas_800_1000 = Set()
+model.Gas_ovr_1000 = Set()
+model.Gas_All_n_0_100 = Set()
+model.Gas_All_n_100_200 = Set()
+model.Gas_All_n_ovr_200 = Set()
+model.Coal_below_50 = Set()
+model.Coal_50_100 = Set()
+model.Coal_100_200 = Set()
+model.Coal_200_300 = Set()
+model.Coal_300_400 = Set()
+model.Coal_400_600 = Set()
+model.Coal_600_800 = Set()
+model.Coal_800_1000 = Set()
+model.Coal_ovr_1000 = Set()
+model.Coal_All_n_0_100 = Set()
+model.Coal_All_n_100_200 = Set()
+model.Coal_All_n_ovr_200 = Set()
 
 # transmission sets
 model.lines = Set() 
@@ -37,8 +66,8 @@ model.maxcap = Param(model.Generators)
 #Min capacity
 model.mincap = Param(model.Generators)
 
-#Marginal cost
-model.marginal_cost = Param(model.Generators)
+#Heat rate
+model.heat_rate = Param(model.Generators)
 
 #Variable O&M
 model.var_om = Param(model.Generators)
@@ -111,6 +140,9 @@ model.SimHydro_MIN = Param(model.Hydro, model.SH_periods, within=NonNegativeReal
 model.SimHydro_TOTAL = Param(model.Hydro, model.SH_periods, within=NonNegativeReals)
 model.SimSolar = Param(model.Solar, model.SH_periods, within=NonNegativeReals)
 model.SimWind = Param(model.Wind, model.SH_periods, within=NonNegativeReals)
+#Lost capacity due to outage
+model.SimGenLimit = Param(model.Outage,model.SH_periods, within=NonNegativeReals)
+model.SimMustrunLimit = Param(model.buses,model.SH_periods, within=NonNegativeReals)
 
 #Variable resources over horizon
 model.HorizonHydro_MAX = Param(model.Hydro,within=NonNegativeReals,mutable=True)
@@ -118,10 +150,13 @@ model.HorizonHydro_MIN = Param(model.Hydro,within=NonNegativeReals,mutable=True)
 model.HorizonHydro_TOTAL = Param(model.Hydro,within=NonNegativeReals,mutable=True)
 model.HorizonSolar = Param(model.Solar,model.hh_periods,within=NonNegativeReals,mutable=True)
 model.HorizonWind = Param(model.Wind,model.hh_periods,within=NonNegativeReals,mutable=True)
+#Lost capacity due to outage
+model.HorizonGenLimit = Param(model.Outage,model.hh_periods, within=NonNegativeReals,mutable=True)
+model.HorizonMustrunLimit = Param(model.buses,model.hh_periods, within=NonNegativeReals,mutable=True)
 
-#Must run resources
-model.Must = Param(model.buses,within=NonNegativeReals)
-
+#Fuel prices over simulation period
+model.SimFuelPrice = Param(model.Thermal,model.SD_periods, within=NonNegativeReals)
+model.FuelPrice = Param(model.Thermal,within = NonNegativeReals, mutable=True)
 ######=================================================########
 ######               Segment B.7                       ########
 ######=================================================########
@@ -147,7 +182,7 @@ model.S = Var(model.buses,model.hh_periods, within=NonNegativeReals,initialize=0
 
 
 # transmission line variables 
-model.Flow= Var(model.lines,model.hh_periods)
+model.Flow= Var(model.lines,model.hh_periods,initialize=0)
 model.Theta= Var(model.buses,model.hh_periods)
 
 #This is created to enforce a penalty on power flows, which prevents slack generation to be transmitted elsewhere in the grid. 
@@ -162,7 +197,7 @@ model.DummyFlow = Var(model.lines,model.hh_periods,initialize=0)
 def SysCost(model):
     fixed = sum(model.no_load[j]*model.on[j,i] for i in model.hh_periods for j in model.UC)
     starts = sum(model.st_cost[j]*model.switch[j,i] for i in model.hh_periods for j in model.UC)
-    gen = sum(model.mwh[j,i]*(model.marginal_cost[j] + model.var_om[j]) for i in model.hh_periods for j in model.Thermal)  
+    gen = sum(model.mwh[j,i]*(model.heat_rate[j]*model.FuelPrice[j] + model.var_om[j]) for i in model.hh_periods for j in model.Thermal)  
     slack = sum(model.S[z,i]*10000 for i in model.hh_periods for z in model.buses)
     hydro_cost = sum(model.mwh[j,i]*0.01 for i in model.hh_periods for j in model.Hydro)
     wind_cost = sum(model.mwh[j,i]*0.01 for i in model.hh_periods for j in model.Wind)
@@ -212,9 +247,16 @@ model.MinCap= Constraint(model.UC,model.hh_periods,rule=MinC)
 
 #####=========== Capacity Constraints ============##########
 # Constraints for Max & Min Capacity of dispatchable resources
+
+#Max capacity constraint for outage set generators (coal, NG)
 def MaxC(model,j,i):
-    return model.mwh[j,i]  <= model.maxcap[j] 
-model.MaxCap= Constraint(model.Dispatchable,model.hh_periods,rule=MaxC)
+    return model.mwh[j,i]  <= model.HorizonGenLimit[j,i] 
+model.MaxCap= Constraint(model.Outage,model.hh_periods,rule=MaxC)
+
+#Max capacity constraint for other dispatchable generators
+def MaxC2(model,j,i):
+    return model.mwh[j,i]  <= model.maxcap[j]
+model.MaxCap2= Constraint(model.Dispatchable,model.hh_periods,rule=MaxC2)
 
 
 #Max production constraints on domestic hydropower 
@@ -253,7 +295,7 @@ def Nodal_Balance(model,z,i):
     power_flow = sum(model.Flow[l,i]*model.LinetoBusMap[l,z] for l in model.lines)   
     gen = sum(model.mwh[j,i]*model.BustoUnitMap[j,z] for j in model.Generators)    
     slack = model.S[z,i]
-    must_run = model.Must[z]
+    must_run = model.HorizonMustrunLimit[z,i]
     return gen + slack + must_run - power_flow == model.HorizonDemand[z,i] 
 model.Node_Constraint = Constraint(model.buses,model.hh_periods,rule=Nodal_Balance)
 
@@ -263,7 +305,7 @@ def Flow_line(model,l,i):
 model.FlowL_Constraint = Constraint(model.lines,model.hh_periods,rule=Flow_line)
 
 def Theta_bus(model,i):
-        return model.Theta['bus_1001',i] == 0
+    return model.Theta['bus_10013',i] == 0
 model.ThetaB_Constraint = Constraint(model.hh_periods,rule=Theta_bus)
 
 def FlowUP_line(model,l,i):
